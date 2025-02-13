@@ -395,7 +395,7 @@ object FlywayPlugin extends AutoPlugin {
 
   private implicit class FluentConfigurationyOps(val flyway: FluentConfiguration) extends AnyVal {
     def configure(config: Config): Flyway = {
-      flyway
+      val result = flyway
         .configure(config.base)
         .configure(config.migrationLoading)
         .configure(config.sqlMigration)
@@ -403,6 +403,10 @@ object FlywayPlugin extends AutoPlugin {
         .configure(config.placeholder)
         .configureSysProps(config.dataSource)
         .load()
+
+      LogFactory.setLogCreator(SbtLogCreator)
+      
+      result
     }
     def configure(config: ConfigBase): FluentConfiguration = {
       flyway
