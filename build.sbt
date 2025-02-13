@@ -4,12 +4,35 @@ lazy val scala212 = "2.12.20"
 lazy val scala3 = "3.6.3"
 
 ThisBuild / organization := "com.github.sbt"
+
+ThisBuild / version := "10.21.0.2"
+
+// Clint: I hacked the build.sbt and project/plugin.sbt so that it uses the
+// CognitOps GCS artifact directory for releasing. To build and release our
+// internal code, just do:
+//
+// 1. sbt compile
+// 2. sbt publish-local
+// 3. sbt publish
+//
+// Hopefully at some point, the open source maintaners fix the bugs and we
+// can get rid of this fork.
+
+/*
 ThisBuild / version := {
   val orig = (ThisBuild / version).value
   if (orig.startsWith("9.") && orig.endsWith("-SNAPSHOT")) {
     "9.0.0-SNAPSHOT"
   } else orig
-}
+}*/
+
+publishTo := Some({
+  val bucketName = "cognitops-libraries"
+  val folder = if (isSnapshot.value) "snapshots" else "releases"
+  s"cognitops $folder" at s"gs://$bucketName/$folder"
+})
+
+
 lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin)
   .settings(
@@ -69,6 +92,7 @@ ThisBuild / scmInfo := Some(
   )
 )
 ThisBuild / homepage := Some(url(s"https://github.com/$repoSlug"))
+/*
 ThisBuild / publishTo := sonatypePublishTo.value
 ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("+test", "+scripted")))
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
@@ -90,3 +114,4 @@ ThisBuild / githubWorkflowOSes := Seq("ubuntu-latest", "macos-latest")
 ThisBuild / githubWorkflowJavaVersions := Seq(
   JavaSpec.temurin("17")
 )
+ */
